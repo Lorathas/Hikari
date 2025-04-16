@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<%- include('../partials/head'); %>
+</head>
+<body>
+	<header>
+		<%- include ('../partials/header'); %>
+	</header>
+	<main>
+		<div class="thread-wall">
+			<% threads.forEach(thread => { %>
+				<div id="<%= thread.id %>" class="thread">
+					<div class="header">
+						<% if (thread.subject) { %>
+							<span class="subject"><%= thread.subject %></span>
+						<% } %>
+						<% if (thread.userName) { %>
+							<span class="name"><%= thread.userName %></span> 
+						<% } else { %>
+							<span class="name">anonymous</span>
+						<% } %>
+						<span class="time"><%= new Intl.DateTimeFormat('en-US', {dateStyle: 'short', timeStyle: 'short'}).format(thread.createdAt) %></span>
+						<span>No. <a href="/<%= board.slug %>/<%= thread.id %>"><%= thread.id %></a></span>
+					</div>
+					<div class="body">
+						<%= thread.text %>
+					</div>
+					<% thread.posts.forEach(post => { %>
+						<div id="<%= post.id %>" class="post">
+							<div class="header">
+								<% if (post.subject) { %>
+									<span class="subject"><%= post.subject %></span>
+								<% } %>
+								<% if (post.userName) { %>
+									<span class="name"><%= post.userName %></span> 
+								<% } else { %>
+									<span class="name">anonymous</span>
+								<% } %>
+								<span class="time"><%= new Intl.DateTimeFormat('en-US', {dateStyle: 'short', timeStyle: 'short'}).format(post.createdAt) %></span>
+								<span>No. <a href="/<%= board.slug %>/<%= thread.id %>#<%= post.id %>"><%= post.id %></a></span>
+							</div>
+							<div class="body">
+								<%= post.text %>
+							</div>
+						</div>
+					<% }) %>
+				</div>
+			<% }) %>
+		</div>
+	</main>
+	<footer>
+		<%- include ('../partials/footer'); %>
+	</footer>
+</body>
+</html>

@@ -1,0 +1,21 @@
+body {
+	background-color: #111111;
+}
+
+body,
+.thread-wall .thread .header a {
+	color: rgb(255 255 255 / 87%);
+}
+
+.thread-wall .thread,
+.thread-wall .thread .post {
+	background-color: oklch(1 0 0 / 0.04)
+}
+
+.thread-wall .header .subject {
+	color: oklch(0.74 0.1053 216.32 / 87%);
+}
+
+.thread-wall .header .name {
+	color: oklch(0.74 0.1053 150.09 / 87%);
+}

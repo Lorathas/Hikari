@@ -1,0 +1,28 @@
+* {
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+h1, h2, h3, h4, h5,
+.thread-wall .thread .name,
+.thread-wall .thread .subject {
+	font-weight: 500;
+}
+
+.thread-wall .thread {
+	padding: 4px 4px;
+}
+
+.thread-wall .thread .header {
+	display: flex;
+	flex-direction: row;
+}
+
+.thread-wall .thread .body,
+.thread-wall .thread .header > * {
+	margin: 2px 4px;
+}
+
+.thread-wall .thread .header a {
+	text-decoration: none;
+	background-color: transparent;
+}

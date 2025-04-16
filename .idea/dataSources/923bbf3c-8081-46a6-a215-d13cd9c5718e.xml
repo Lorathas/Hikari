@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataSource name="@localhost">
+  <database-model serializer="dbm" dbms="MONGO" family-id="MONGO" format-version="4.48">
+    <root id="1">
+      <ServerVersion>8.0.8</ServerVersion>
+    </root>
+    <schema id="2" parent="1" name="admin"/>
+    <schema id="3" parent="1" name="config"/>
+    <schema id="4" parent="1" name="local"/>
+    <schema id="5" parent="1" name="test">
+      <Current>1</Current>
+    </schema>
+    <table id="6" parent="5" name="boards"/>
+    <table id="7" parent="5" name="threads_vt"/>
+    <column id="8" parent="6" name="_id">
+      <DasType>ObjectId|12s</DasType>
+      <Position>1</Position>
+    </column>
+    <column id="9" parent="6" name="config">
+      <DasType>Object|4999544s</DasType>
+      <Position>1</Position>
+    </column>
+    <column id="10" parent="6" name="description">
+      <DasType>String|12s</DasType>
+      <Position>1</Position>
+    </column>
+    <column id="11" parent="6" name="isPublic">
+      <DasType>Boolean|12s</DasType>
+      <Position>1</Position>
+    </column>
+    <column id="12" parent="6" name="slug">
+      <DasType>String|12s</DasType>
+      <Position>1</Position>
+    </column>
+    <column id="13" parent="6" name="config.imageBumpLimit">
+      <DasType>Int32|4s</DasType>
+      <Position>2</Position>
+    </column>
+    <column id="14" parent="6" name="lastPostId">
+      <DasType>Int32|4s</DasType>
+      <Position>2</Position>
+    </column>
+    <column id="15" parent="6" name="config.maxImageSize">
+      <DasType>Int32|4s</DasType>
+      <Position>3</Position>
+    </column>
+    <column id="16" parent="6" name="name">
+      <DasType>String|12s</DasType>
+      <Position>3</Position>
+    </column>
+    <column id="17" parent="6" name="config.maxVideoSize">
+      <DasType>Int32|4s</DasType>
+      <Position>4</Position>
+    </column>
+    <column id="18" parent="6" name="pageLimit">
+      <DasType>Int32|4s</DasType>
+      <Position>4</Position>
+    </column>
+    <column id="19" parent="6" name="config.postBumpLimit">
+      <DasType>Int32|4s</DasType>
+      <Position>5</Position>
+    </column>
+    <column id="20" parent="6" name="pageSize">
+      <DasType>Int32|4s</DasType>
+      <Position>5</Position>
+    </column>
+    <column id="21" parent="6" name="config.userImagePostCooldown">
+      <DasType>Int32|4s</DasType>
+      <Position>6</Position>
+    </column>
+    <column id="22" parent="6" name="config.userPostCooldown">
+      <DasType>Int32|4s</DasType>
+      <Position>7</Position>
+    </column>
+    <column id="23" parent="6" name="config.userThreadCooldown">
+      <DasType>Int32|4s</DasType>
+      <Position>8</Position>
+    </column>
+    <column id="24" parent="7" name="_id">
+      <DasType>ObjectId|12s</DasType>
+      <Position>1</Position>
+    </column>
+    <column id="25" parent="7" name="createdAt">
+      <DasType>ISODate|91s</DasType>
+      <Position>1</Position>
+    </column>
+    <column id="26" parent="7" name="id">
+      <DasType>Int32|4s</DasType>
+      <Position>1</Position>
+    </column>
+    <column id="27" parent="7" name="postBumpCount">
+      <DasType>Int32|4s</DasType>
+      <Position>1</Position>
+    </column>
+    <column id="28" parent="7" name="subject">
+      <DasType>String|12s</DasType>
+      <Position>1</Position>
+    </column>
+    <column id="29" parent="7" name="banned">
+      <DasType>Boolean|12s</DasType>
+      <Position>2</Position>
+    </column>
+    <column id="30" parent="7" name="deleted">
+      <DasType>Boolean|12s</DasType>
+      <Position>2</Position>
+    </column>
+    <column id="31" parent="7" name="imageBumpCount">
+      <DasType>Int32|4s</DasType>
+      <Position>2</Position>
+    </column>
+    <column id="32" parent="7" name="posts">
+      <DasType>list|4999545s</DasType>
+      <Position>2</Position>
+    </column>
+    <column id="33" parent="7" name="text">
+      <DasType>String|12s</DasType>
+      <Position>2</Position>
+    </column>
+    <column id="34" parent="7" name="bumpTime">
+      <DasType>ISODate|91s</DasType>
+      <Position>3</Position>
+    </column>
+    <column id="35" parent="7" name="userCountry">
+      <DasType>String|12s</DasType>
+      <Position>3</Position>
+    </column>
+    <column id="36" parent="7" name="posts.banned">
+      <DasType>Boolean|12s</DasType>
+      <Position>3</Position>
+    </column>
+    <column id="37" parent="7" name="userId">
+      <DasType>String|12s</DasType>
+      <Position>4</Position>
+    </column>
+    <column id="38" parent="7" name="posts.createdAt">
+      <DasType>ISODate|91s</DasType>
+      <Position>4</Position>
+    </column>
+    <column id="39" parent="7" name="userIp">
+      <DasType>String|12s</DasType>
+      <Position>5</Position>
+    </column>
+    <column id="40" parent="7" name="posts.deleted">
+      <DasType>Boolean|12s</DasType>
+      <Position>5</Position>
+    </column>
+    <column id="41" parent="7" name="posts.id">
+      <DasType>Int32|4s</DasType>
+      <Position>6</Position>
+    </column>
+    <column id="42" parent="7" name="posts.text">
+      <DasType>String|12s</DasType>
+      <Position>7</Position>
+    </column>
+    <column id="43" parent="7" name="posts.userCountry">
+      <DasType>String|12s</DasType>
+      <Position>8</Position>
+    </column>
+    <column id="44" parent="7" name="posts.userId">
+      <DasType>String|12s</DasType>
+      <Position>9</Position>
+    </column>
+    <column id="45" parent="7" name="posts.userIp">
+      <DasType>String|12s</DasType>
+      <Position>10</Position>
+    </column>
+  </database-model>
+</dataSource>
