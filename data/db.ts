@@ -1,14 +1,25 @@
-import {BSON, Collection, MongoClient, ObjectId} from "mongodb"
-import {Mutex} from "async-mutex";
-import type Thread from "./thread";
-import type Board from "./board";
+import {Collection, MongoClient, ObjectId} from "mongodb"
+import {type Thread} from "./post";
+import {type BoardConfig, type Board} from "./board";
 
-export const client = new MongoClient(process.env.NERO_CONN_STRING)
-export const db = client.db('test')
+export const client = new MongoClient(process.env.HIKARI_CONN_STRING!)
+export const db = client.db('hikari')
 
+export const boardDefaults = db.collection<BoardConfig>('board_defaults')
 export const boards = db.collection<Board>('boards')
 
 const boardThreadCollections: {[id: string]: Collection<Thread>} = {}
+
+export async function init() {
+	for await (const board of boards.find()) {
+		const boardThreadCollectionName = `threads_${board!.slug}`
+		db.createCollection(boardThreadCollectionName)
+
+		const threads = db.collection<Thread>(boardThreadCollectionName)
+
+		boardThreadCollections[board._id.toHexString()] = threads
+	}
+}
 
 export async function getThreadCollectionForBoard(boardId: ObjectId): Promise<Collection<Thread>> {
 	if (!boardThreadCollections.hasOwnProperty(boardId.toHexString())) {

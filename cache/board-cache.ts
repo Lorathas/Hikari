@@ -1,7 +1,10 @@
-import type Board from "../data/board";
+import {type Board, type BoardConfig} from "../data/board";
 import {ObjectId, type WithId} from "mongodb";
 import * as boardDal from '../data/dal/board-dal'
+import { boardDefaults } from "../data/db";
+import {omit, defaultsDeep} from 'lodash'
 
+let boardConfigDefault: BoardConfig|null = null
 const boardIdCache: {[id: string]: WithId<Board>} = {}
 const boardSlugCache: {[name: string]: WithId<Board>} = {}
 
@@ -9,6 +12,21 @@ export function getBoard(boardId: ObjectId|string): Promise<WithId<Board>> {
     return typeof boardId === 'string'
         ? getCachedBoardBySlug(boardId)
         : getCachedBoardById(boardId)
+}
+
+async function initBoardConfigDefault() {
+    if (boardConfigDefault) {
+        return
+    }
+
+    const boardConfig = await boardDefaults.findOne()
+
+    if (!boardConfig) {
+        console.error('Default board config not found')
+        throw 'Default board config not found'
+    }
+
+    boardConfigDefault = <BoardConfig> omit(boardConfig, ['_id'])
 }
 
 export async function getCachedBoardById(boardId: ObjectId): Promise<WithId<Board>> {
@@ -20,6 +38,10 @@ export async function getCachedBoardById(boardId: ObjectId): Promise<WithId<Boar
             console.warn(err)
             throw err
         }
+
+        await initBoardConfigDefault()
+
+        board.config = defaultsDeep(board.config, boardConfigDefault)
 
         console.info(`Board not found in cache {_id: ${board._id.toHexString()}, name: ${board.name}}`)
         boardIdCache[board._id.toHexString()] = board
@@ -43,6 +65,10 @@ export async function getCachedBoardBySlug(slug: string): Promise<WithId<Board>>
             console.warn(err)
             throw err
         }
+
+        await initBoardConfigDefault()
+
+        board.config = defaultsDeep(board.config, boardConfigDefault)
 
         console.info(`Board not found in cache {_id: ${board._id.toHexString()}, slug: ${board.slug}}`)
         boardSlugCache[board.slug] = board

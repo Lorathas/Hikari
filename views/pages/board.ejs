@@ -27,23 +27,7 @@
 						<%= thread.text %>
 					</div>
 					<% thread.posts.forEach(post => { %>
-						<div id="<%= post.id %>" class="post">
-							<div class="header">
-								<% if (post.subject) { %>
-									<span class="subject"><%= post.subject %></span>
-								<% } %>
-								<% if (post.userName) { %>
-									<span class="name"><%= post.userName %></span> 
-								<% } else { %>
-									<span class="name">anonymous</span>
-								<% } %>
-								<span class="time"><%= new Intl.DateTimeFormat('en-US', {dateStyle: 'short', timeStyle: 'short'}).format(post.createdAt) %></span>
-								<span>No. <a href="/<%= board.slug %>/<%= thread.id %>#<%= post.id %>"><%= post.id %></a></span>
-							</div>
-							<div class="body">
-								<%= post.text %>
-							</div>
-						</div>
+						<%- include('../partials/post', {post, board, thread}) %>
 					<% }) %>
 				</div>
 			<% }) %>

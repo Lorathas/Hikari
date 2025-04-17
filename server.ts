@@ -1,6 +1,10 @@
+require('dotenv').config()
 import express from "express"
-import boardRouter from "./routes/board";
-import errorRouter from "./routes/errors";
+import boardRouter from './routes/board'
+import errorRouter from './routes/errors'
+import * as db from './data/db'
+
+await db.init()
 
 const app = express()
 const port = 8080

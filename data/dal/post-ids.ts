@@ -1,9 +1,8 @@
-import Thread from "../thread";
 import {ObjectId} from "mongodb";
-import {boards, client, db, threads} from "../db";
+import {boards, client, getThreadCollectionForBoard} from "../db";
 import {Mutex} from "async-mutex";
-import Post from "../post";
-
+import {type Post, type Thread} from "../post";
+import * as boardCache from '../../cache/board-cache'
 
 
 const boardPostMutexes: {[board: string]: Mutex} = {}
@@ -11,12 +10,12 @@ const boardLastPostIds: {[board: string]: number} = {}
 
 async function incrementId(boardId: ObjectId) {
     if (!boardLastPostIds.hasOwnProperty(boardId.toHexString())) {
-        const board = await boards.findOne({_id: boardId})
+        const board = await boardCache.getCachedBoardById(boardId)
 
         boardLastPostIds[boardId.toHexString()] = board.lastPostId
     }
 
-    const id = boardLastPostIds[boardId.toHexString()] + 1
+    const id = boardLastPostIds[boardId.toHexString()]! + 1
 
     boardLastPostIds[boardId.toHexString()] = id
 
@@ -32,7 +31,7 @@ function getBoardMutex(boardId: ObjectId) {
         boardPostMutexes[boardId.toHexString()] = new Mutex()
     }
 
-    return boardPostMutexes[boardId.toHexString()]
+    return boardPostMutexes[boardId.toHexString()]!
 }
 
 /**
@@ -53,6 +52,8 @@ export async function createThreadInternal(boardId: ObjectId, thread: Thread): P
 
             const time = new Date()
 
+            const threads = await getThreadCollectionForBoard(boardId)
+
             const result = await threads.insertOne({
                 id: id,
                 subject: thread.subject,
@@ -63,6 +64,9 @@ export async function createThreadInternal(boardId: ObjectId, thread: Thread): P
                 userIp: thread.userIp,
                 deleted: thread.deleted,
                 banned: thread.banned,
+                postBumpCount: 0,
+                imageBumpCount: 0,
+                bumpedAt: time,
                 posts: []
             })
 
@@ -85,6 +89,9 @@ export async function createThreadInternal(boardId: ObjectId, thread: Thread): P
                 userIp: thread.userIp,
                 deleted: thread.deleted,
                 banned: thread.banned,
+                postBumpCount: 0,
+                imageBumpCount: 0,
+                bumpedAt: time,
                 posts: []
             }
         } catch (error) {
@@ -109,8 +116,12 @@ export async function createPostInternal(boardId: ObjectId, threadId: ObjectId, 
             const id = await incrementId(boardId)
 
             const time = new Date()
+            
+            const threads = await getThreadCollectionForBoard(boardId)
 
             const result = await threads.updateOne({_id: threadId}, {
+                $push: {
+                    posts: {
                 id: id,
                 text: post.text,
                 createdAt: time,
@@ -119,7 +130,7 @@ export async function createPostInternal(boardId: ObjectId, threadId: ObjectId, 
                 userIp: post.userIp,
                 deleted: post.deleted,
                 banned: post.banned
-            })
+            }}})
 
             if (!result.acknowledged) {
                 await session.abortTransaction()

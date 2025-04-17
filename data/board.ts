@@ -1,4 +1,4 @@
-export default interface Board {
+export interface Board {
     slug: string
     name: string
     description: string
@@ -10,14 +10,34 @@ export default interface Board {
 }
 
 export interface BoardConfig {
-    maxImageSize: number
-    maxVideoSize: number
-    userThreadCooldown: number
-    userPostCooldown: number
-    userImagePostCooldown: number
+    pages: PageConfig
+    fileSizes: FileSizeConfig
+    userCooldowns: UserCooldownConfig
+    bump: BumpLimitsConfig
+    query: QueryLimitsConfig
+}
 
-    postBumpLimit: number
-    imageBumpLimit: number
+export interface PageConfig {
+    size: number
+    limit: number
+}
 
-    boardReplyLimit: number
+export interface FileSizeConfig {
+    image: number
+    video: number
+}
+
+export interface BumpLimitsConfig {
+    posts: number
+    threads: number
+}
+
+export interface UserCooldownConfig {
+    threads: number
+    posts: number
+    images: number
+}
+
+export interface QueryLimitsConfig {
+    boardReply: number
 }

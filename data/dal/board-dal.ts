@@ -1,4 +1,4 @@
-import type Board from "../board";
+import {type Board} from "../board";
 import {ObjectId, type WithId} from "mongodb";
 import {boards} from "../db";
 

@@ -1,7 +1,7 @@
 import {AggregationCursor, ObjectId, type WithId} from "mongodb";
 import {getThreadCollectionForBoard} from "../db";
 import * as boardCache from '../../cache/board-cache'
-import type Thread from "../thread";
+import {type Thread} from "../post";
 import {clamp} from "../../util/math";
 
 function aggregateQuery(boardId: ObjectId): any[] {
@@ -26,7 +26,7 @@ function pageQuery(replyLimit: number): any[] {
                                         cond: {$eq: ["$$post.deleted", false]}
                                     }
                                 },
-                                sortBy: {createdAt: -1}
+                                sortBy: {createdAt: 1}
                             }
                         },
                         replyLimit
@@ -43,14 +43,16 @@ function threadForNumberQuery(threadNo: number): any[] {
     ]
 }
 
-export async function getPage(boardId: ObjectId, page: number = 0): Promise<AggregationCursor<Thread>> {
+export async function getPage(boardId: ObjectId, page: number|undefined = undefined): Promise<AggregationCursor<Thread>> {
     const board = await boardCache.getCachedBoardById(boardId)
 
-    page = clamp(page, 0, board.pageLimit - 1)
+    const actualPage: number = page ?? 0
+    
+    page = clamp(actualPage, 0, board.pageLimit - 1)
 
-    const query = pageQuery(board.config.boardReplyLimit)
-    query.push({$skip: page * board.pageSize})
-    query.push({$limit: board.pageLimit})
+    const query = pageQuery(board.config.query.boardReply)
+    query.push({$skip: actualPage * board.config.pages.size})
+    query.push({$limit: board.config.pages.limit})
 
 
     const threads = await getThreadCollectionForBoard(boardId)
@@ -62,7 +64,7 @@ export async function getCatalog(boardId: ObjectId): Promise<AggregationCursor<T
     const board = await boardCache.getCachedBoardById(boardId)
 
     const query = aggregateQuery(boardId)
-    query.push({$limit: board.pageSize * board.pageLimit})
+    query.push({$limit: board.config.pages.size * board.config.pages.limit})
 
     const threads = await getThreadCollectionForBoard(boardId)
     
@@ -72,7 +74,7 @@ export async function getCatalog(boardId: ObjectId): Promise<AggregationCursor<T
 export async function getThread(boardId: ObjectId, threadNo: number): Promise<AggregationCursor<Thread>> {
     const board = await boardCache.getCachedBoardById(boardId)
 
-    const query = threadNumQuery(threadNo)
+    const query = threadForNumberQuery(threadNo)
 
     const threads = await getThreadCollectionForBoard(boardId)
 
