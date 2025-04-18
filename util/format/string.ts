@@ -1,10 +1,7 @@
-import type { WithId } from 'mongodb'
-import type { Thread } from '../../data/post'
-import type { Board } from '../../data/board'
-import type { EmbeddedToken, TokenEmbedder } from './embed-formatter'
+import type { EmbeddedToken, EmbedderContext, TokenEmbedder } from './embed-formatter'
 
 
-function format(thread: WithId<Thread>, board: WithId<Board>, token: string): Promise<EmbeddedToken> {
+function format(token: string): Promise<EmbeddedToken> {
 	return Promise.resolve({
 		safe: false,
 		text: token

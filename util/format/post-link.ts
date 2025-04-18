@@ -1,50 +1,47 @@
-import type { Board } from '../../data/board'
-import type { Post, Thread } from '../../data/post'
+import type { Post } from '../../data/post'
 import tryFind from '../fp/try-find'
-import { getThreadPostForNumber } from '../../data/dal/thread-dal'
 import * as ejs from 'ejs'
-import type { WithId } from 'mongodb'
-import type { EmbeddedToken, TokenEmbedder } from './embed-formatter'
+import type { EmbeddedToken, EmbedderContext, TokenEmbedder } from './embed-formatter'
 
 const tokenRegex = />>(\d+)/
 
-export async function format(
-	thread: WithId<Thread>,
-	board: WithId<Board>,
-	token: string
-): Promise<EmbeddedToken> {
+export async function format(token: string, context: EmbedderContext): Promise<EmbeddedToken> {
 	const match = tokenRegex.exec(token)
 
-	const postNumber: number = parseInt(match!.groups![1]!)
+	if (!match) {
+		throw new Error('Token is not a post-link')
+	}
+
+	const postNumber: number = parseInt(match![1]!)
 
 	let referencedPost: Post | undefined
 
-	if (postNumber === thread.id) {
+	if (postNumber === context.thread.id) {
 		return {
 			safe: true,
-			text: await ejs.renderFile('../../views/embeds/post-link-op.ejs', {
-				board: board.slug,
-				threadNumber: thread.id,
+			text: await ejs.renderFile('views/embeds/post-link-op.ejs', {
+				board: context.board.slug,
+				threadNumber: context.thread.id,
 				postNumber,
 			}),
 		}
 	} else if (
 		tryFind(
-			thread.posts,
+			context.thread.posts,
 			(p) => p.id === postNumber,
 			(p) => (referencedPost = p)
 		)
 	) {
 		return {
 			safe: true,
-			text: await ejs.renderFile('../../views/embeds/post-link.ejs', {
-				board: board.slug,
-				threadNumber: thread.id,
+			text: await ejs.renderFile('views/embeds/post-link.ejs', {
+				board: context.board.slug,
+				threadNumber: context.thread.id,
 				postNumber: referencedPost!.id,
 			}),
 		}
 	} else {
-		const threadPost = await getThreadPostForNumber(board._id, postNumber)
+		const threadPost = await context.findThreadWithPostNumber(postNumber)
 
 		if (!threadPost) {
 			return {
@@ -55,8 +52,8 @@ export async function format(
 
 		return {
 			safe: true,
-			text: await ejs.renderFile('../../views/embeds/post-link.ejs', {
-				board: board.slug,
+			text: await ejs.renderFile('views/embeds/post-link-same-board.ejs', {
+				board: context.board.slug,
 				threadNumber: threadPost.id,
 				postNumber: threadPost.post.id,
 			}),
