@@ -1,14 +1,14 @@
-import type { EmbeddedToken, EmbedderContext, TokenEmbedder } from './embed-formatter'
+import type { EmbeddedToken, TokenEmbedder } from './embed-formatter'
 
 
-function format(token: string): Promise<EmbeddedToken> {
+export function format(token: string): Promise<EmbeddedToken> {
 	return Promise.resolve({
 		safe: false,
 		text: token
 	})
 }
 
-function contains(token: string) {
+export function contains() {
 	return true
 }
 
