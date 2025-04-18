@@ -1,4 +1,4 @@
-# nero
+# hikari
 
 To install dependencies:
 
