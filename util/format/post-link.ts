@@ -65,9 +65,9 @@ export function contains(token: string): boolean {
 	return tokenRegex.test(token)
 }
 
-const postLinkFormatter: TokenEmbedder = {
+const postLinkEmbedder: TokenEmbedder = {
 	format,
 	contains
 }
 
-export default postLinkFormatter
+export default postLinkEmbedder

@@ -1,28 +1,23 @@
 import type { EmbeddedToken, TokenEmbedder } from './embed-formatter'
 
-const matchesRegex = /^\s*$/
-const lineBreakRegex = /(\r\n|\r|\n)/g
-
 export function contains(token: string): boolean {
-	return matchesRegex.test(token)
+	return token === '\r' || token === '\r\n' || token === '\n'
 }
 
 export function format(token: string): Promise<EmbeddedToken> {
-	if (!matchesRegex.test(token)) {
-		return Promise.reject(new Error('Token contains non-whitespace characters'))
+	if (!contains(token)) {
+		throw Promise.reject(new Error('Token is not a valid line-break sequence'))
 	}
-
-	const formatted = token.replaceAll(lineBreakRegex, '<br/>')
 
 	return Promise.resolve({
 		safe: true,
-		text: formatted
+		text: '<br/>'
 	})
 }
 
-const newlineFormatter: TokenEmbedder = {
+const newlineEmbedder: TokenEmbedder = {
 	contains,
 	format
 }
 
-export default newlineFormatter
+export default newlineEmbedder

@@ -12,9 +12,9 @@ export function contains() {
 	return true
 }
 
-const stringFormatter: TokenEmbedder = {
+const stringEmbedder: TokenEmbedder = {
 	format,
 	contains
 }
 
-export default stringFormatter
+export default stringEmbedder
