@@ -1,10 +1,10 @@
-import type { Post } from "../post";
+import type { z } from 'zod'
+import { PostSchema, ThreadSchema } from '../post'
 
-export default interface ThreadPost extends Post {
-    subject: string
-    post: Post
-    bumpedAt: Date
-    postBumpCount: number
-    imageBumpCount: number
-    userName?: string
-}
+export const ThreadPostSchema = ThreadSchema
+	.omit({posts: true})
+	.extend({
+		post: PostSchema
+	})
+
+export type ThreadPost = z.infer<typeof ThreadPostSchema>

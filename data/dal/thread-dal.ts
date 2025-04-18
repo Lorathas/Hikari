@@ -1,57 +1,57 @@
-import {AggregationCursor, ObjectId, type WithId} from "mongodb";
-import {getThreadCollectionForBoard} from "../db";
+import {AggregationCursor, ObjectId, type Document} from 'mongodb';
+import {getThreadCollectionForBoard} from '../db';
 import * as boardCache from '../../cache/board-cache'
-import {type Thread} from "../post";
-import {clamp} from "../../util/math";
-import type ThreadPost from "../views/thread-post";
+import {type Thread} from '../post';
+import {clamp} from '../../util/math';
+import {type ThreadPost} from '../views/thread-post';
 
-function aggregateQuery(boardId: ObjectId): any[] {
-    return [
-        {$sort: {bumpTime: -1}}
-    ]
+function aggregateQuery(boardId: ObjectId): Document[] {
+	return [
+		{$sort: {bumpTime: -1}}
+	]
 }
 
-function pageQuery(replyLimit: number): any[] {
-    return [
-        {$match: {id: 1, deleted: false}},
-        {
-            $set: {
-                posts: {
-                    $slice: [
-                        {
-                            $sortArray: {
-                                input: {
-                                    $filter: {
-                                        input: "$posts",
-                                        as: "post",
-                                        cond: {$eq: ["$$post.deleted", false]}
-                                    }
-                                },
-                                sortBy: {createdAt: 1}
-                            }
-                        },
-                        replyLimit
-                    ]
-                }
-            }
-        }
-    ]
+function pageQuery(replyLimit: number): Document[] {
+	return [
+		{$match: {id: 1, deleted: false}},
+		{
+			$set: {
+				posts: {
+					$slice: [
+						{
+							$sortArray: {
+								input: {
+									$filter: {
+										input: '$posts',
+										as: 'post',
+										cond: {$eq: ['$$post.deleted', false]}
+									}
+								},
+								sortBy: {createdAt: 1}
+							}
+						},
+						replyLimit
+					]
+				}
+			}
+		}
+	]
 }
 
-function threadForNumberQuery(threadNo: number): any[] {
-    return [
+function threadForNumberQuery(threadNo: number): Document[] {
+	return [
         
-    ]
+	]
 }
 
-function threadForPostQuery(postNo: number): any[] {
-    return [
-        {$match: {"posts.id": postNo}},
-        {$unwind: "$posts"},
-        {$match: {"posts.id": postNo}},
-        {$set: {post: "$posts"}},
-        {$unset: "posts"}
-    ]
+function threadForPostQuery(postNo: number): Document[] {
+	return [
+		{$match: {'posts.id': postNo}},
+		{$unwind: '$posts'},
+		{$match: {'posts.id': postNo}},
+		{$set: {post: '$posts'}},
+		{$unset: 'posts'}
+	]
 }
 
 /**
@@ -61,20 +61,20 @@ function threadForPostQuery(postNo: number): any[] {
  * @returns 
  */
 export async function getPage(boardId: ObjectId, page: number|undefined = undefined): Promise<AggregationCursor<Thread>> {
-    const board = await boardCache.getCachedBoardById(boardId)
+	const board = await boardCache.getCachedBoardById(boardId)
 
-    const actualPage: number = page ?? 0
+	const actualPage: number = page ?? 0
     
-    page = clamp(actualPage, 0, board.config.pages.limit - 1)
+	page = clamp(actualPage, 0, board.config.pages.limit - 1)
 
-    const query = pageQuery(board.config.query.boardReply)
-    query.push({$skip: actualPage * board.config.pages.size})
-    query.push({$limit: board.config.pages.limit})
+	const query = pageQuery(board.config.query.boardReplies)
+	query.push({$skip: actualPage * board.config.pages.size})
+	query.push({$limit: board.config.pages.limit})
 
 
-    const threads = await getThreadCollectionForBoard(boardId)
+	const threads = await getThreadCollectionForBoard(boardId)
     
-    return await threads.aggregate<Thread>(query);
+	return await threads.aggregate<Thread>(query);
 }
 
 /**
@@ -83,14 +83,14 @@ export async function getPage(boardId: ObjectId, page: number|undefined = undefi
  * @returns Catalog threads for the board
  */
 export async function getCatalog(boardId: ObjectId): Promise<AggregationCursor<Thread>> {
-    const board = await boardCache.getCachedBoardById(boardId)
+	const board = await boardCache.getCachedBoardById(boardId)
 
-    const query = aggregateQuery(boardId)
-    query.push({$limit: board.config.pages.size * board.config.pages.limit})
+	const query = aggregateQuery(boardId)
+	query.push({$limit: board.config.pages.size * board.config.pages.limit})
 
-    const threads = await getThreadCollectionForBoard(boardId)
+	const threads = await getThreadCollectionForBoard(boardId)
     
-    return await threads.aggregate<Thread>(query);
+	return await threads.aggregate<Thread>(query);
 }
 
 /**
@@ -100,19 +100,19 @@ export async function getCatalog(boardId: ObjectId): Promise<AggregationCursor<T
  * @returns Thread if it exists, otherwise null
  */
 export async function getThread(boardId: ObjectId, threadNo: number): Promise<Thread|null> {
-    const board = await boardCache.getCachedBoardById(boardId)
+	const board = await boardCache.getCachedBoardById(boardId)
 
-    const query = threadForNumberQuery(threadNo)
+	const query = threadForNumberQuery(threadNo)
 
-    const threads = await getThreadCollectionForBoard(boardId)
+	const threads = await getThreadCollectionForBoard(boardId)
 
-    const results = await threads.aggregate<Thread>(query).toArray()
+	const results = await threads.aggregate<Thread>(query).toArray()
 
-    if (results.length > 0) {
-        return results[0]!
-    } else {
-        return null
-    }
+	if (results.length > 0) {
+		return results[0]!
+	} else {
+		return null
+	}
 }
 
 /**
@@ -122,17 +122,17 @@ export async function getThread(boardId: ObjectId, threadNo: number): Promise<Th
  * @returns ThreadPost for the post if it exists, otherwise null
  */
 export async function getThreadPostForNumber(boardId: ObjectId, postNo: number): Promise<ThreadPost|null> {
-    const board = await boardCache.getCachedBoardById(boardId)
+	const board = await boardCache.getCachedBoardById(boardId)
 
-    const query = threadForPostQuery(postNo)
+	const query = threadForPostQuery(postNo)
 
-    const threads = await getThreadCollectionForBoard(boardId)
+	const threads = await getThreadCollectionForBoard(boardId)
 
-    const postThreads = await threads.aggregate<ThreadPost>(query).toArray()
+	const postThreads = await threads.aggregate<ThreadPost>(query).toArray()
 
-    if (postThreads.length > 0) {
-        return postThreads[0]!
-    } else {
-        return null
-    }
+	if (postThreads.length > 0) {
+		return postThreads[0]!
+	} else {
+		return null
+	}
 }

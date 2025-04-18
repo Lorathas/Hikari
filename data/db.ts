@@ -1,6 +1,6 @@
-import {Collection, MongoClient, ObjectId} from "mongodb"
-import {type Thread} from "./post";
-import {type BoardConfig, type Board} from "./board";
+import {Collection, MongoClient, ObjectId} from 'mongodb'
+import {type Thread} from './post'
+import {type BoardConfig, type Board} from './board'
 
 export const client = new MongoClient(process.env.HIKARI_CONN_STRING!)
 export const db = client.db('hikari')
@@ -25,7 +25,7 @@ export async function init() {
 			threads.createIndex({id: 1}, {name: threadNumberIndex, unique: true})
 		}
 		if (!await threads.indexExists(threadPostNumberIndex)) {
-			threads.createIndex({"posts.id": 1}, {name: threadPostNumberIndex, unique: true})
+			threads.createIndex({'posts.id': 1}, {name: threadPostNumberIndex, unique: true})
 		}
 
 		boardThreadCollections[board._id.toHexString()] = threads

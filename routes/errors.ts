@@ -1,5 +1,4 @@
-import { Router, type Request, type Response } from "express"
-import type { SiteRequest } from "../middleware/site-request"
+import { Router, type Request, type Response } from 'express'
 
 
 const errorRouter = Router()
