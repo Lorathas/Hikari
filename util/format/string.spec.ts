@@ -2,7 +2,7 @@ import {test, expect} from 'bun:test'
 import {contains, format} from './string'
 
 test('contains', () => {
-	expect(contains('')).toBeTrue()
+	expect(contains()).toBeTrue()
 })
 
 test('format', async () => {
