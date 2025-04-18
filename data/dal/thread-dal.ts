@@ -3,6 +3,7 @@ import {getThreadCollectionForBoard} from "../db";
 import * as boardCache from '../../cache/board-cache'
 import {type Thread} from "../post";
 import {clamp} from "../../util/math";
+import type ThreadPost from "../views/thread-post";
 
 function aggregateQuery(boardId: ObjectId): any[] {
     return [
@@ -43,12 +44,28 @@ function threadForNumberQuery(threadNo: number): any[] {
     ]
 }
 
+function threadForPostQuery(postNo: number): any[] {
+    return [
+        {$match: {"posts.id": postNo}},
+        {$unwind: "$posts"},
+        {$match: {"posts.id": postNo}},
+        {$set: {post: "$posts"}},
+        {$unset: "posts"}
+    ]
+}
+
+/**
+ * Query the board in page format with config number of replies
+ * @param boardId ID of the board
+ * @param page Page of the board to fetch
+ * @returns 
+ */
 export async function getPage(boardId: ObjectId, page: number|undefined = undefined): Promise<AggregationCursor<Thread>> {
     const board = await boardCache.getCachedBoardById(boardId)
 
     const actualPage: number = page ?? 0
     
-    page = clamp(actualPage, 0, board.pageLimit - 1)
+    page = clamp(actualPage, 0, board.config.pages.limit - 1)
 
     const query = pageQuery(board.config.query.boardReply)
     query.push({$skip: actualPage * board.config.pages.size})
@@ -60,6 +77,11 @@ export async function getPage(boardId: ObjectId, page: number|undefined = undefi
     return await threads.aggregate<Thread>(query);
 }
 
+/**
+ * Query the board in a catalog format without posts
+ * @param boardId ID of the board
+ * @returns Catalog threads for the board
+ */
 export async function getCatalog(boardId: ObjectId): Promise<AggregationCursor<Thread>> {
     const board = await boardCache.getCachedBoardById(boardId)
 
@@ -71,12 +93,46 @@ export async function getCatalog(boardId: ObjectId): Promise<AggregationCursor<T
     return await threads.aggregate<Thread>(query);
 }
 
-export async function getThread(boardId: ObjectId, threadNo: number): Promise<AggregationCursor<Thread>> {
+/**
+ * Get thread by it's number
+ * @param boardId ID of the board the thread is on
+ * @param threadNo Number of the thread
+ * @returns Thread if it exists, otherwise null
+ */
+export async function getThread(boardId: ObjectId, threadNo: number): Promise<Thread|null> {
     const board = await boardCache.getCachedBoardById(boardId)
 
     const query = threadForNumberQuery(threadNo)
 
     const threads = await getThreadCollectionForBoard(boardId)
 
-    return await threads.aggregate<Thread>(query)
+    const results = await threads.aggregate<Thread>(query).toArray()
+
+    if (results.length > 0) {
+        return results[0]!
+    } else {
+        return null
+    }
+}
+
+/**
+ * Get thread for post in ThreadPost format
+ * @param boardId ID of the board the post is on
+ * @param postNo Number of the post
+ * @returns ThreadPost for the post if it exists, otherwise null
+ */
+export async function getThreadPostForNumber(boardId: ObjectId, postNo: number): Promise<ThreadPost|null> {
+    const board = await boardCache.getCachedBoardById(boardId)
+
+    const query = threadForPostQuery(postNo)
+
+    const threads = await getThreadCollectionForBoard(boardId)
+
+    const postThreads = await threads.aggregate<ThreadPost>(query).toArray()
+
+    if (postThreads.length > 0) {
+        return postThreads[0]!
+    } else {
+        return null
+    }
 }

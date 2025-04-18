@@ -10,12 +10,23 @@ export const boards = db.collection<Board>('boards')
 
 const boardThreadCollections: {[id: string]: Collection<Thread>} = {}
 
+const threadNumberIndex = 'thread_number'
+const threadPostNumberIndex = 'post_number'
+
 export async function init() {
+	// Initialize Collections and Indexes for boards
 	for await (const board of boards.find()) {
 		const boardThreadCollectionName = `threads_${board!.slug}`
 		db.createCollection(boardThreadCollectionName)
 
 		const threads = db.collection<Thread>(boardThreadCollectionName)
+
+		if (!await threads.indexExists(threadNumberIndex)) {
+			threads.createIndex({id: 1}, {name: threadNumberIndex, unique: true})
+		}
+		if (!await threads.indexExists(threadPostNumberIndex)) {
+			threads.createIndex({"posts.id": 1}, {name: threadPostNumberIndex, unique: true})
+		}
 
 		boardThreadCollections[board._id.toHexString()] = threads
 	}
