@@ -3,6 +3,7 @@ import stringEmbedder from './string'
 import postLinkEmbedder from './post-link'
 import newlineEmbedder from './newline'
 import urlEmbedder from './url'
+import type { EmbeddedPost, EmbeddedThread, Thread } from '../../data/post'
 
 const embedderRegistry: TokenEmbedder[] = [
 	postLinkEmbedder,
@@ -10,7 +11,7 @@ const embedderRegistry: TokenEmbedder[] = [
 	urlEmbedder,
 ]
 
-export async function formatPost(text: string, context: EmbedderContext): Promise<EmbeddedToken[]> {
+export async function formatPostText(text: string, context: EmbedderContext): Promise<EmbeddedToken[]> {
 	const tokens = tokenizeWithWhitespace(text)
 
 	const processedTokens: EmbeddedToken[] = []
@@ -37,6 +38,20 @@ export async function formatPost(text: string, context: EmbedderContext): Promis
 	}
 
 	return processedTokens
+}
+
+export async function formatThread(thread: Thread, context: EmbedderContext): Promise<EmbeddedThread> {
+	const embedded: EmbeddedThread = thread
+
+	embedded.embeds = await formatPostText(embedded.text, context)
+
+	embedded.posts = await Promise.all(embedded.posts.map(async (post: EmbeddedPost) => {
+		post.embeds = await formatPostText(post.text, context)
+
+		return post
+	}))
+	
+	return embedded
 }
 
 const tokenizeRegex = /(\r\n|\n|\s+|\S+)/g

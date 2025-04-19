@@ -8,16 +8,12 @@
 		<%- include ('../partials/header'); %>
 	</header>
 	<main>
-		<% thread.posts.forEach(post => { %>
-		 <div id="<%= post.id %>" class="post">
-			<div class="header">
-				
-			</div>
-			<div class="body">
-				<%= post.text %>
-			</div>
-		 </div>
-		<% }) %>
+		<div class="thread-wall">
+			<%- include('../partials/post', {board, post: thread, page, op: true}) %>
+			<% for (const post of thread.posts) { %>
+				<%- include('../partials/post', {board, post, page, op: false}) %>
+			<% } %>
+		</div>
 	</main>
 	<footer>
 		<%- include ('../partials/footer'); %>

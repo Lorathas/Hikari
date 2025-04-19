@@ -1,4 +1,4 @@
-<div id="<%= post.id %>" class="post">
+<div id="<%= post.id %>" class="post<% if (op) { %><%= ' op' %><% } %>">
     <div class="header">
         <% if (post.subject) { %>
             <span class="subject"><%= post.subject %></span>

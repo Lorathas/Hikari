@@ -3,26 +3,32 @@
 }
 
 h1, h2, h3, h4, h5,
-.thread-wall .thread .name,
-.thread-wall .thread .subject {
+.thread .name,
+.thread .subject,
+.post .name,
+.post .subject
+.op .name,
+.op .subject {
 	font-weight: bold;
 }
 
-.thread-wall .thread {
-	padding: 4px 4px;
+.thread,
+.post {
+	padding: 4px 2px;
+	margin: 4px 2px;
 }
 
-.thread-wall .thread .header {
+.thread .header {
 	display: flex;
 	flex-direction: row;
 }
 
-.thread-wall .thread .body,
-.thread-wall .thread .header > * {
+.thread .body,
+.thread .header > * {
 	margin: 2px 4px;
 }
-
-.thread-wall .thread .header a {
+.thread .header a,
+.post .header a {
 	text-decoration: none;
 	background-color: transparent;
 }

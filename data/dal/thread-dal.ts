@@ -27,11 +27,27 @@ function pageQuery(replyLimit: number): Document[] {
 										cond: {$eq: ['$$post.deleted', false]}
 									}
 								},
-								sortBy: {createdAt: 1}
+								sortBy: {createdAt: -1}
 							}
 						},
 						replyLimit
 					]
+				}
+			}
+		},
+		{
+			$set: {
+				posts: {
+					$sortArray: {
+						input: {
+							$filter: {
+								input: '$posts',
+								as: 'post',
+								cond: {$eq: ['$$post.deleted', false]}
+							}
+						},
+						sortBy: {createdAt: 1}
+					}
 				}
 			}
 		}
@@ -40,7 +56,23 @@ function pageQuery(replyLimit: number): Document[] {
 
 function threadForNumberQuery(threadNo: number): Document[] {
 	return [
-        
+		{$match: {id: threadNo, deleted: false}},
+		{
+			$set: {
+				posts: {
+					$sortArray: {
+						input: {
+							$filter: {
+								input: '$posts',
+								as: 'post',
+								cond: {$eq: ['$$post.deleted', false]}
+							}
+						},
+						sortBy: {createdAt: 1}
+					}
+				}
+			}
+		}
 	]
 }
 
@@ -99,19 +131,19 @@ export async function getCatalog(boardId: ObjectId): Promise<AggregationCursor<T
  * @param threadNo Number of the thread
  * @returns Thread if it exists, otherwise null
  */
-export async function getThread(boardId: ObjectId, threadNo: number): Promise<Thread|null> {
+export async function getThread(boardId: ObjectId, threadNo: number): Promise<WithId<Thread>|undefined> {
 	const board = await boardCache.getCachedBoardById(boardId)
 
 	const query = threadForNumberQuery(threadNo)
 
 	const threads = await getThreadCollectionForBoard(boardId)
 
-	const results = await threads.aggregate<Thread>(query).toArray()
+	const results = await threads.aggregate<WithId<Thread>>(query).toArray()
 
 	if (results.length > 0) {
 		return results[0]!
 	} else {
-		return null
+		return undefined
 	}
 }
 

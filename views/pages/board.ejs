@@ -39,7 +39,7 @@
 					</div>
 					<% if (thread.posts) { %>
 						<% thread.posts.forEach(post => { %>
-							<%- include('../partials/post', {post, board, thread, page}) %>
+							<%- include('../partials/post', {post, board, thread, page, op: false}) %>
 						<% }) %>
 					<% } %>
 				</div>

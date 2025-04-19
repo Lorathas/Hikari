@@ -1,5 +1,5 @@
 import {test, expect} from 'bun:test'
-import { formatPost, tokenizeWithWhitespace } from './format-post'
+import { formatPostText, tokenizeWithWhitespace } from './format-post'
 import { mockEmbedderContext } from './mock.spec'
 
 test('tokenizeWithWhitespace', () => {
@@ -30,14 +30,14 @@ test('tokenizeWithWhitespace', () => {
 })
 
 test('formatPost', async () => {
-	let tokenizedPost = await formatPost('>>1\ntest post formatting', mockEmbedderContext)
+	let tokenizedPost = await formatPostText('>>1\ntest post formatting', mockEmbedderContext)
 	expect(tokenizedPost).toBeArrayOfSize(3)
 	expect(tokenizedPost[0]).toStrictEqual({safe: true, text: '<a href="#1">&gt;&gt;1 (OP)</a>'})
 	expect(tokenizedPost[1]).toStrictEqual({safe: true, text: '<br/>'})
 	expect(tokenizedPost[2]).toStrictEqual({safe: false, text: 'test post formatting'})
 
 
-	tokenizedPost = await formatPost('>>1\ntest post   formatting', mockEmbedderContext)
+	tokenizedPost = await formatPostText('>>1\ntest post   formatting', mockEmbedderContext)
 	expect(tokenizedPost).toBeArrayOfSize(3)
 	expect(tokenizedPost[0]).toStrictEqual({safe: true, text: '<a href="#1">&gt;&gt;1 (OP)</a>'})
 	expect(tokenizedPost[1]).toStrictEqual({safe: true, text: '<br/>'})
