@@ -2,6 +2,7 @@ import type { WithId } from 'mongodb'
 import type { Board } from '../../data/board'
 import type { Thread } from '../../data/post'
 import type { ThreadPost } from '../../data/views/thread-post'
+import { z } from 'zod'
 
 export interface TokenEmbedder {
     contains(token: string): boolean
@@ -19,3 +20,8 @@ export interface EmbedderContext {
 	findThreadOnBoardWithPostNumber: (boardSlug: string, postNumber: number) => Promise<ThreadPost|undefined>
     findThreadWithPostNumber: (postNumber: number) => Promise<ThreadPost|undefined>
 }
+
+export const EmbeddedTokenSchema = z.object({
+	safe: z.boolean(),
+	text: z.string()
+})

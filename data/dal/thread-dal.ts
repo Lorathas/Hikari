@@ -1,4 +1,4 @@
-import {AggregationCursor, ObjectId, type Document} from 'mongodb'
+import {AggregationCursor, ObjectId, type Document, type WithId} from 'mongodb'
 import {getThreadCollectionForBoard} from '../db'
 import * as boardCache from '../../cache/board-cache'
 import {type Thread} from '../post'
@@ -60,7 +60,7 @@ function threadForPostQuery(postNo: number): Document[] {
  * @param page Page of the board to fetch
  * @returns 
  */
-export async function getPage(boardId: ObjectId, page: number|undefined = undefined): Promise<AggregationCursor<Thread>> {
+export async function getPage(boardId: ObjectId, page: number|undefined = undefined): Promise<AggregationCursor<WithId<Thread>>> {
 	const board = await boardCache.getCachedBoardById(boardId)
 
 	const actualPage: number = page ?? 0
@@ -121,7 +121,7 @@ export async function getThread(boardId: ObjectId, threadNo: number): Promise<Th
  * @param postNo Number of the post
  * @returns ThreadPost for the post if it exists, otherwise null
  */
-export async function getThreadPostForNumber(boardId: ObjectId, postNo: number): Promise<ThreadPost|null> {
+export async function getThreadPostForNumber(boardId: ObjectId, postNo: number): Promise<ThreadPost|undefined> {
 	const board = await boardCache.getCachedBoardById(boardId)
 
 	const query = threadForPostQuery(postNo)
@@ -133,6 +133,22 @@ export async function getThreadPostForNumber(boardId: ObjectId, postNo: number):
 	if (postThreads.length > 0) {
 		return postThreads[0]!
 	} else {
-		return null
+		return undefined
+	}
+}
+
+export async function getThreadPostForBoardSlugAndNumber(boardSlug: string, postNo: number): Promise<ThreadPost|undefined> {
+	const board = await boardCache.getCachedBoardBySlug(boardSlug)
+
+	const query = threadForPostQuery(postNo)
+
+	const threads = await getThreadCollectionForBoard(board._id)
+
+	const postThreads = await threads.aggregate<ThreadPost>(query).toArray()
+
+	if (postThreads.length > 0) {
+		return postThreads[0]!
+	} else {
+		return undefined
 	}
 }

@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { EmbeddedTokenSchema } from '../util/format/embed-formatter'
 
 export const PostSchema = z.object({
 	id: z.number().int(),
@@ -18,6 +19,14 @@ export const ThreadSchema = PostSchema.extend({
 	imageBumpCount: z.number().int(),
 	posts: z.array(PostSchema),
 	bumpedAt: z.date()
+})
+
+export const EmbeddedThreadSchema = ThreadSchema.extend({
+	embeds: z.array(EmbeddedTokenSchema).optional()
+})
+
+export const EmbeddedPostSchema = PostSchema.extend({
+	embeds: z.array(EmbeddedTokenSchema).optional()
 })
 
 export const CreatePostSchema = PostSchema.omit({
@@ -42,6 +51,9 @@ export const CreateThreadSchema = ThreadSchema.omit({
 
 export type Post = z.infer<typeof PostSchema>
 export type Thread = z.infer<typeof ThreadSchema>
+
+export type EmbeddedThread = z.infer<typeof EmbeddedThreadSchema>
+export type EmbeddedPost = z.infer<typeof EmbeddedPostSchema>
 
 export type CreatePost = z.infer<typeof CreatePostSchema>
 export type CreateThread = z.infer<typeof CreateThreadSchema>

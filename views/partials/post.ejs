@@ -12,6 +12,16 @@
         <span>No. <a href="/<%= board.slug %>/<%= thread.id %>#<%= post.id %>"><%= post.id %></a></span>
     </div>
     <div class="body">
-        <%= post.text %>
+        <% if (post.embeds) { %>
+            <% post.embeds.forEach(embed => { %>
+                <% if (embed.safe) { %>
+                    <%- embed.text %>
+                <% } else { %>
+                    <%= embed.text %>
+                <% } %>
+            <% }) %>
+        <% } else { %>
+            <%= post.text %>
+        <% } %>
     </div>
 </div>
