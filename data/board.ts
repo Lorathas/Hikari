@@ -22,7 +22,7 @@ export const BumpLimitsConfigSchema = z.object({
 })
 
 export const QueryLimitsConfigSchema = z.object({
-	boardReplies: z.number().int()
+	boardReply: z.number().int()
 })
 
 export const BoardConfigSchema = z.object({

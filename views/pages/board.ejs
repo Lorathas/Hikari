@@ -26,9 +26,11 @@
 					<div class="body">
 						<%= thread.text %>
 					</div>
-					<% thread.posts.forEach(post => { %>
-						<%- include('../partials/post', {post, board, thread}) %>
-					<% }) %>
+					<% if (thread.posts) { %>
+						<% thread.posts.forEach(post => { %>
+							<%- include('../partials/post', {post, board, thread}) %>
+						<% }) %>
+					<% } %>
 				</div>
 			<% }) %>
 		</div>

@@ -17,7 +17,7 @@ test('contains', () => {
 })
 
 test('format', async () => {
-    // TODO: Figure out why expecting it to reject breaks the fucking tests
+	// TODO: Figure out why expecting it to reject breaks the fucking tests
 	// await expect(format('skfow keoefl kfg\r')).rejects.toThrowError('Token is not a valid line-break sequence')
 	// await expect(format('skfow keoefl kfg')).rejects.toThrowError('Token is not a valid line-break sequence')
 	// await expect(format('skfow keoefl\r\nkfg')).rejects.toThrowError('Token is not a valid line-break sequence')

@@ -1,9 +1,9 @@
-import {AggregationCursor, ObjectId, type Document} from 'mongodb';
-import {getThreadCollectionForBoard} from '../db';
+import {AggregationCursor, ObjectId, type Document} from 'mongodb'
+import {getThreadCollectionForBoard} from '../db'
 import * as boardCache from '../../cache/board-cache'
-import {type Thread} from '../post';
-import {clamp} from '../../util/math';
-import {type ThreadPost} from '../views/thread-post';
+import {type Thread} from '../post'
+import {clamp} from '../../util/math'
+import {type ThreadPost} from '../views/thread-post'
 
 function aggregateQuery(boardId: ObjectId): Document[] {
 	return [
@@ -67,14 +67,14 @@ export async function getPage(boardId: ObjectId, page: number|undefined = undefi
     
 	page = clamp(actualPage, 0, board.config.pages.limit - 1)
 
-	const query = pageQuery(board.config.query.boardReplies)
+	const query = pageQuery(board.config.query.boardReply)
 	query.push({$skip: actualPage * board.config.pages.size})
 	query.push({$limit: board.config.pages.limit})
 
 
 	const threads = await getThreadCollectionForBoard(boardId)
     
-	return await threads.aggregate<Thread>(query);
+	return await threads.aggregate<Thread>(query)
 }
 
 /**
@@ -90,7 +90,7 @@ export async function getCatalog(boardId: ObjectId): Promise<AggregationCursor<T
 
 	const threads = await getThreadCollectionForBoard(boardId)
     
-	return await threads.aggregate<Thread>(query);
+	return await threads.aggregate<Thread>(query)
 }
 
 /**

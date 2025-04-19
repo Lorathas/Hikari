@@ -57,7 +57,7 @@ export const mockBoard: WithId<Board> = {
 			images: 0
 		},
 		query: {
-			boardReplies: 0
+			boardReply: 0
 		}
 	}
 }
