@@ -134,6 +134,10 @@ export async function getCatalog(boardId: ObjectId): Promise<AggregationCursor<T
 export async function getThread(boardId: ObjectId, threadNo: number): Promise<WithId<Thread>|undefined> {
 	const board = await boardCache.getCachedBoardById(boardId)
 
+	if (!board) {
+		return undefined
+	}
+
 	const query = threadForNumberQuery(threadNo)
 
 	const threads = await getThreadCollectionForBoard(boardId)

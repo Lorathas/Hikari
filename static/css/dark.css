@@ -26,3 +26,13 @@ body,
 .header .name {
 	color: oklch(0.74 0.1053 150.09 / 87%);
 }
+
+.thread a,
+.post a {
+	color: oklch(0.74 0.1053 29.38 / 87%);
+}
+
+.thread a:hover,
+.post a:hover {
+	color: oklch(0.74 0.1053 29.38 / 100%);
+}

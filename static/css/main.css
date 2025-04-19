@@ -1,5 +1,5 @@
 * {
-	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	font-family: 'Segoe UI', Ubuntu, Tahoma, Geneva, Verdana, sans-serif;
 }
 
 h1, h2, h3, h4, h5,
@@ -12,10 +12,18 @@ h1, h2, h3, h4, h5,
 	font-weight: bold;
 }
 
+.thread .header,
+.post .header {
+	margin-bottom: 8px;
+}
+
 .thread,
 .post {
-	padding: 4px 2px;
+	padding: 10px 8px;
 	margin: 4px 2px;
+	display: block;
+	float: left;
+	clear: both;
 }
 
 .thread .header {
