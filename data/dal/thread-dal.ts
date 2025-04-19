@@ -13,7 +13,7 @@ function aggregateQuery(boardId: ObjectId): Document[] {
 
 function pageQuery(replyLimit: number): Document[] {
 	return [
-		{$match: {id: 1, deleted: false}},
+		{$match: {deleted: false}},
 		{
 			$set: {
 				posts: {

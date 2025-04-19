@@ -2,6 +2,7 @@ import type { Post } from '../../data/post'
 import tryFind from '../fp/try-find'
 import * as ejs from 'ejs'
 import type { EmbeddedToken, EmbedderContext, TokenEmbedder } from './embed-formatter'
+import Page from '../../data/page'
 
 const tokenRegex = />>(\d+)/
 
@@ -19,7 +20,7 @@ export async function format(token: string, context: EmbedderContext): Promise<E
 	if (postNumber === context.thread.id) {
 		return {
 			safe: true,
-			text: await ejs.renderFile('views/embeds/post-link-op.ejs', {
+			text: await ejs.renderFile(context.page === Page.Board ? 'views/embeds/board-post-link-op.ejs' : 'views/embeds/post-link-op.ejs', {
 				board: context.board.slug,
 				threadNumber: context.thread.id,
 				postNumber,
@@ -34,7 +35,7 @@ export async function format(token: string, context: EmbedderContext): Promise<E
 	) {
 		return {
 			safe: true,
-			text: await ejs.renderFile('views/embeds/post-link.ejs', {
+			text: await ejs.renderFile(context.page === Page.Board ? 'views/embeds/board-post-link.ejs' : 'views/embeds/post-link.ejs', {
 				board: context.board.slug,
 				threadNumber: context.thread.id,
 				postNumber: referencedPost!.id,

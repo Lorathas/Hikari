@@ -3,6 +3,7 @@ import type { Board } from '../../data/board'
 import type { Thread } from '../../data/post'
 import type { ThreadPost } from '../../data/views/thread-post'
 import { z } from 'zod'
+import type Page from '../../data/page'
 
 export interface TokenEmbedder {
     contains(token: string): boolean
@@ -15,6 +16,7 @@ export interface EmbeddedToken {
 }
 
 export interface EmbedderContext {
+    page: Page
 	board: WithId<Board>
 	thread: WithId<Thread>
 	findThreadOnBoardWithPostNumber: (boardSlug: string, postNumber: number) => Promise<ThreadPost|undefined>

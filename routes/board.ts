@@ -3,8 +3,9 @@ import * as threadDal from '../data/dal/thread-dal'
 import {boardInjectMiddleware, type BoardRequest} from '../middleware/board-inject'
 import type { EmbedderContext } from '../util/format/embed-formatter'
 import { formatPost } from '../util/format/format-post'
-import { EmbeddedPostSchema, type EmbeddedThread, type Thread } from '../data/post'
+import { EmbeddedPostSchema, type EmbeddedPost, type EmbeddedThread, type Thread } from '../data/post'
 import type { WithId } from 'mongodb'
+import Page from '../data/page'
 
 
 const boardRouter = Router()
@@ -19,6 +20,7 @@ async function getBoard(req: BoardRequest, res: Response) {
 
 	const embedPromises = threads.map(async (thread: WithId<EmbeddedThread>) => {
 		const context: EmbedderContext = {
+			page: Page.Board,
 			board: req.board,
 			thread,
 			findThreadOnBoardWithPostNumber: (boardSlug: string, postNumber: number) => { return threadDal.getThreadPostForBoardSlugAndNumber(boardSlug, postNumber) },
@@ -40,7 +42,8 @@ async function getBoard(req: BoardRequest, res: Response) {
 
 	res.render('pages/board', {
 		board: req.board,
-		threads: embeddedThreads
+		threads: embeddedThreads,
+		page: Page.Board
 	})
 }
 

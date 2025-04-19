@@ -25,11 +25,21 @@
 						<span>No. <a href="/<%= board.slug %>/<%= thread.id %>"><%= thread.id %></a></span>
 					</div>
 					<div class="body">
+						<% if (thread.embeds) { %>
+							<% for (const embed of thread.embeds) { %>
+								<% if (embed.safe) { %>
+									<%- embed.text %>
+								<% } else { %>
+									<%= embed.text %>
+								<% } %>
+							<% } %>
+						<% } else { %>
 						<%= thread.text %>
+						<% } %>
 					</div>
 					<% if (thread.posts) { %>
 						<% thread.posts.forEach(post => { %>
-							<%- include('../partials/post', {post, board, thread}) %>
+							<%- include('../partials/post', {post, board, thread, page}) %>
 						<% }) %>
 					<% } %>
 				</div>
