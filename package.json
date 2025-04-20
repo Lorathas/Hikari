@@ -8,7 +8,7 @@
     "mongodb": "^6.15.0",
     "zod": "^3.24.3"
   },
-  "name": "nero",
+  "name": "hikari",
   "private": true,
   "devDependencies": {
     "@eslint/js": "^9.24.0",

@@ -82,7 +82,7 @@ async function getThread(req: BoardRequest, res: Response, next: NextFunction) {
 	}
 
 	const context: EmbedderContext = {
-		page: Page.Board,
+		page: Page.Thread,
 		board: req.board,
 		thread: thread!,
 		findThreadOnBoardWithPostNumber: (boardSlug: string, postNumber: number) => { return threadDal.getThreadPostForBoardSlugAndNumber(boardSlug, postNumber) },

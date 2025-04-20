@@ -11,7 +11,7 @@ const port = 8080
 
 app.set('view engine', 'ejs')
 
-app.use('/static', express.static('static'))
+app.use('/static', express.static('build'))
 app.use('/', errorRouter)
 app.use('/', boardRouter)
 

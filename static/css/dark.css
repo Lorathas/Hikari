@@ -36,3 +36,8 @@ body,
 .post a:hover {
 	color: oklch(0.74 0.1053 29.38 / 100%);
 }
+
+.thread.highlighted,
+.post.highlighted {
+	background-color: oklch(1 0 0 / 0.08)
+}
