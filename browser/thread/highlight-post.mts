@@ -1,43 +1,40 @@
-import onReady from "../on-ready.mjs";
+import onReady from '../on-ready.mjs'
+import {getPostLinks} from '../util/get-post-links'
 
-function addHighlightToPost(this: HTMLAnchorElement, event: MouseEvent) {
-    const postNumber = this.dataset.postNumber
+function addHighlightToPost(this: HTMLAnchorElement) {
+	const postNumber = this.dataset.postNumber
 
-    const targetPost = document.getElementById(postNumber!)
+	const targetPost = document.getElementById(postNumber!)
 
-    if (!targetPost) {
-        return
-    }
+	if (!targetPost) {
+		return
+	}
 
-    targetPost.classList.add('highlighted')
+	targetPost.classList.add('highlighted')
 }
 
 function removeHighlightFromPost(this: HTMLAnchorElement) {
-    const postNumber = this.dataset.postNumber
-    const targetPost = document.getElementById(postNumber!)
+	const postNumber = this.dataset.postNumber
+	const targetPost = document.getElementById(postNumber!)
 
-    if (!targetPost) {
-        return
-    }
+	if (!targetPost) {
+		return
+	}
 
-    targetPost.classList.remove('highlighted')
+	targetPost.classList.remove('highlighted')
 }
 
 function addPostLinkListeners() {
-    // const currentThreadNumber = document.getElementById('thread-wall').dataset.threadNumber
-    // @ts-ignore
-    const postLinks: HTMLAnchorElement[] = <HTMLAnchorElement> Array.from(document.getElementsByClassName('post-link'))
+	for (const postLink of getPostLinks()) {
+		const postNumber = postLink.dataset.postNumber
 
-    for (const postLink of postLinks) {
-        const postNumber = postLink.dataset.postNumber
+		if (typeof postNumber === 'undefined') {
+			continue
+		}
 
-        if (typeof postNumber === 'undefined') {
-            continue
-        }
-
-        postLink.addEventListener('mouseover', addHighlightToPost)
-        postLink.addEventListener('mouseleave', removeHighlightFromPost)
-    }
+		postLink.addEventListener('mouseover', addHighlightToPost)
+		postLink.addEventListener('mouseleave', removeHighlightFromPost)
+	}
 }
 
 onReady(addPostLinkListeners)
