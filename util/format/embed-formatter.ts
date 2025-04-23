@@ -1,9 +1,10 @@
 import type { WithId } from 'mongodb'
-import type { Board } from '../../data/board'
+import {Board, type BoardData} from '../../data/board'
 import type { Thread } from '../../data/post'
 import type { ThreadPost } from '../../data/views/thread-post'
 import { z } from 'zod'
 import type Page from '../../data/page'
+import type {ThreadRow} from '../../data/dal/thread-dal.ts'
 
 export interface TokenEmbedder {
     contains(token: string): boolean
@@ -17,10 +18,10 @@ export interface EmbeddedToken {
 
 export interface EmbedderContext {
     page: Page
-	board: WithId<Board>
-	thread: WithId<Thread>
-	findThreadOnBoardWithPostNumber: (boardSlug: string, postNumber: number) => Promise<ThreadPost|undefined>
-    findThreadWithPostNumber: (postNumber: number) => Promise<ThreadPost|undefined>
+	board: Board
+	thread: Thread
+	findThreadOnBoardWithPostNumber: (boardSlug: string, postNumber: number) => Promise<ThreadRow|undefined>
+    findThreadWithPostNumber: (postNumber: number) => Promise<ThreadRow|undefined>
 }
 
 export const EmbeddedTokenSchema = z.object({

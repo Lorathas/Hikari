@@ -1,5 +1,5 @@
 import { ObjectId, type WithId } from 'mongodb'
-import type { Board } from '../../data/board'
+import type { BoardData } from '../../data/board'
 import type { Thread } from '../../data/post'
 import type {EmbedderContext} from './embed-formatter'
 import {mock} from 'bun:test'
@@ -31,7 +31,7 @@ export const mockThread: WithId<Thread> = {
 	_id: new ObjectId()
 }
 
-export const mockBoard: WithId<Board> = {
+export const mockBoard: WithId<BoardData> = {
 	_id: new ObjectId(),
 	slug: 'test',
 	name: 'test',

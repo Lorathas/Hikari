@@ -1,16 +1,13 @@
 import {type NextFunction, type Response, Router} from 'express'
-import * as threadDal from '../data/dal/thread-dal'
+import * as threadDal from '../data/dal/thread-dal.ts'
 import {boardInjectMiddleware, type BoardRequest} from '../middleware/board-inject'
 import type { EmbedderContext } from '../util/format/embed-formatter'
 import { formatPostText, formatThread } from '../util/format/format-post'
-import { EmbeddedPostSchema, type EmbeddedPost, type EmbeddedThread, type Thread } from '../data/post'
+import { type EmbeddedPost, type EmbeddedThread, type Thread } from '../data/post'
 import type { WithId } from 'mongodb'
 import Page from '../data/page'
 import { z } from 'zod'
-import type { Board } from '../data/board'
-import * as bun from 'bun'
-import * as boardCache from '../cache/board-cache'
-import ejs from 'ejs'
+import type { BoardData } from '../data/board'
 
 
 const boardRouter = Router()
@@ -23,9 +20,15 @@ const ThreadQuerySchema = BoardQuerySchema.extend({
 	threadNumber: z.coerce.number().int().positive()
 })
 
+const BoardPageQuerySchema = z.object({
+	p: z.number().int().positive()
+})
+
+type BoardPageQuery = z.infer<typeof BoardPageQuerySchema>
+
 //region Internal Logic
 
-async function getThreadInternal(thread: WithId<Thread>, board: WithId<Board>) {
+async function getThreadInternal(thread: WithId<Thread>, board: WithId<BoardData>) {
 	const context: EmbedderContext = {
 		page: Page.Thread,
 		board: board,
@@ -47,15 +50,24 @@ async function getBoard(req: BoardRequest, res: Response) {
 		return
 	}
 
-	const threads: WithId<Thread>[] = await (await threadDal.getPage(req.board._id)).toArray()
+	const queryParse = BoardPageQuerySchema.safeParse(req.query)
 
-	const embedPromises = threads.map(async (thread: WithId<EmbeddedThread>) => {
+	let query: BoardPageQuery
+	if (queryParse.success) {
+		query = queryParse.data
+	} else {
+		query = { p: 0 }
+	}
+
+	const threads= await threadDal.getCatalogPage(req.board.threadTableName, query.p)
+
+	const embedPromises = threads.map(async (thread: EmbeddedThread) => {
 		const context: EmbedderContext = {
 			page: Page.Board,
 			board: req.board,
 			thread,
 			findThreadOnBoardWithPostNumber: (boardSlug: string, postNumber: number) => { return threadDal.getThreadPostForBoardSlugAndNumber(boardSlug, postNumber) },
-			findThreadWithPostNumber: (postNumber: number) => { return threadDal.getThreadPostForNumber(req.board._id, postNumber) }
+			findThreadWithPostNumber: (postNumber: number) => { return threadDal.getThreadPostForBoardSlugAndNumber(req.board.slug, postNumber) }
 		}
 
 		thread.embeds = await formatPostText(thread.text, context)
@@ -79,7 +91,7 @@ async function getBoard(req: BoardRequest, res: Response) {
 }
 
 async function getCatalog(req: BoardRequest, res: Response) {
-	const catalog = await threadDal.getCatalog(req.board._id)
+	const catalog = await threadDal.getCatalogPage(req.board.id)
 
 	res.render('pages/catalog', {
 		board: req.board,
@@ -96,7 +108,7 @@ async function getThreadExpress(req: BoardRequest, res: Response, next: NextFunc
 		return
 	}
 
-	const thread = await threadDal.getThread(req.board._id, params.data!.threadNumber)
+	const thread = await threadDal.getThreadById(req.board.id, params.data!.threadNumber)
 
 	if (!thread) {
 		next()
@@ -110,95 +122,6 @@ async function getThreadExpress(req: BoardRequest, res: Response, next: NextFunc
 		thread: embedded,
 		page: Page.Thread
 	})
-}
-
-//endregion
-
-//region Bun Request Handlers
-
-/**
- * GET Board page
- * Bun API Bersion
- * @param req
- */
-export async function getBoardBun(req: bun.BunRequest) {
-	const board = await boardCache.getCachedBoardBySlug(req.params.board)
-
-	if (!board) {
-		return Response.redirect('/404')
-	}
-
-	const threads: WithId<Thread>[] = await (await threadDal.getPage(board._id)).toArray()
-
-	// Embed threads with their specific context
-	const embedPromises = threads.map(async (thread: WithId<EmbeddedThread>) => {
-		const context: EmbedderContext = {
-			page: Page.Board,
-			board: board,
-			thread,
-			findThreadOnBoardWithPostNumber: (boardSlug: string, postNumber: number) => { return threadDal.getThreadPostForBoardSlugAndNumber(boardSlug, postNumber) },
-			findThreadWithPostNumber: (postNumber: number) => { return threadDal.getThreadPostForNumber(req.board._id, postNumber) }
-		}
-
-		return await formatThread(thread, context)
-	})
-
-	const embeddedThreads = await Promise.all(embedPromises)
-
-	return new Response(await ejs.renderFile('views/pages/board', {
-		board: board,
-		threads: embeddedThreads,
-		page: Page.Board
-	}))
-}
-
-/**
- * GET Catalog page
- * Bun API Version
- * @param req
- * @param res
- */
-export async function getCatalogBun(req: bun.BunRequest) {
-	const board = await boardCache.getCachedBoardBySlug(req.params.board)
-
-	if (!board) {
-		return Response.redirect('/404')
-	}
-
-	const catalog = await threadDal.getCatalog(board._id)
-
-	return new Response(await ejs.renderFile('views/pages/catalog', {
-		board: board,
-		threads: catalog,
-		page: Page.Catalog
-	}))
-}
-
-/**
- * GET Thread page
- * Bun API Version
- * @param req Request
- */
-export async function getThreadBun(req: bun.BunRequest) {
-	const board = await boardCache.getCachedBoardBySlug(req.params.board)
-
-	if (!board) {
-		return Response.redirect('/404')
-	}
-
-	const thread = await threadDal.getThread(board._id, req.params.threadNumber)
-
-	if (!thread) {
-		return Response.redirect('/404')
-	}
-
-	const embedded = await getThreadInternal(thread, board)
-
-	return new Response(await ejs.renderFile('views/pages/thread', {
-		board,
-		thread: embedded,
-		page: Page.Thread
-	}), { status: 200 })
 }
 
 //endregion

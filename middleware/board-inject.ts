@@ -1,11 +1,10 @@
 import {type NextFunction, type Response} from 'express'
 import {type SiteRequest} from './site-request'
 import * as boardCache from '../cache/board-cache'
-import {type Board} from '../data/board'
-import type { WithId } from 'mongodb'
+import {Board} from '../data/board'
 
 export interface BoardRequest extends SiteRequest {
-    board: WithId<Board>
+    board: Board
 }
 
 export async function boardInjectMiddleware(req: BoardRequest, res: Response, next: NextFunction) {

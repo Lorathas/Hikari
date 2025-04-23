@@ -3,13 +3,13 @@ require('dotenv').config()
 import express from 'express'
 import boardRouter from './routes/board'
 import errorRouter from './routes/errors'
-import * as db from './data/db'
 import compression from 'compression'
-
-await db.init()
+import * as boardCache from './cache/board-cache'
 
 const app = express()
 const port = 8080
+
+await boardCache.initialize()
 
 app.use(compression())
 

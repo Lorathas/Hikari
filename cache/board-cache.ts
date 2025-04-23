@@ -1,25 +1,40 @@
-import {type Board, type BoardConfig} from '../data/board'
-import {ObjectId, type WithId} from 'mongodb'
-import * as boardDal from '../data/dal/board-dal'
-import { boardDefaults } from '../data/db'
+import {type BoardConfig, Board} from '../data/board'
+import * as boardDal from '../data/dal/board-dal.ts'
 import {omit, defaultsDeep} from 'lodash'
+import * as boardDefaultsDal from '../data/dal/board-defaults-dal.ts'
 
 let boardConfigDefault: BoardConfig|null = null
-const boardIdCache: {[id: string]: WithId<Board>} = {}
-const boardSlugCache: {[name: string]: WithId<Board>} = {}
+const boardIdCache = new Map<number, Board>()
+const boardSlugCache = new Map<string, Board>()
 
-export function getBoard(boardId: ObjectId|string): Promise<WithId<Board>> {
-	return typeof boardId === 'string'
-		? getCachedBoardBySlug(boardId)
-		: getCachedBoardById(boardId)
+export async function initialize() {
+	const boards = (await boardDal.getAll()).map((b) => new Board(b))
+
+	for (const board of boards) {
+		boardIdCache.set(board.id, board)
+		boardSlugCache.set(board.slug, board)
+	}
 }
 
+/**
+ * Get Board by ID or Slug
+ * @param boardIdOrSlug Board ID or Board Slug
+ */
+export function getBoard(boardIdOrSlug: number|string): Promise<Board> {
+	return typeof boardIdOrSlug === 'string'
+		? getCachedBoardBySlug(boardIdOrSlug)
+		: getCachedBoardById(boardIdOrSlug)
+}
+
+/**
+ * Initialize the Board cache
+ */
 async function initBoardConfigDefault() {
 	if (boardConfigDefault) {
 		return
 	}
 
-	const boardConfig = await boardDefaults.findOne()
+	const boardConfig = await boardDefaultsDal.getBoardDefaults()
 
 	if (!boardConfig) {
 		console.error('Default board config not found')
@@ -29,57 +44,81 @@ async function initBoardConfigDefault() {
 	boardConfigDefault = <BoardConfig> omit(boardConfig, ['_id'])
 }
 
-export async function getCachedBoardById(boardId: ObjectId): Promise<WithId<Board>> {
+/**
+ * Get cached Board based on it's ID
+ * @param boardId ID of the Board
+ */
+export async function getCachedBoardById(boardId: number): Promise<Board> {
 	// eslint-disable-next-line no-prototype-builtins
-	if (!boardIdCache.hasOwnProperty(boardId.toHexString())) {
-		const board = await boardDal.getById(boardId)
+	if (!boardIdCache.hasOwnProperty(boardId)) {
+		const boardRow = await boardDal.getById(boardId)
 
-		if (!board) {
-			const err = `Board not found for ID ${boardId.toHexString()}`
+		if (!boardRow) {
+			const err = `Board not found for ID ${boardId}`
 			console.warn(err)
 			throw err
 		}
 
 		await initBoardConfigDefault()
 
-		board.config = defaultsDeep(board.config, boardConfigDefault)
+		boardRow.config = defaultsDeep(boardRow.config ?? {}, boardConfigDefault)
 
-		console.info(`Board not found in cache {_id: ${board._id.toHexString()}, name: ${board.name}}`)
-		boardIdCache[board._id.toHexString()] = board
+		const board = new Board(boardRow)
 
-		if (boardSlugCache.hasOwnProperty(board.slug)) {
-			console.warn(`Board not found in ID cache, but found in Name cache {_id: ${board._id.toHexString()}, slug: ${board.slug}}`)
+		console.info(`Board not found in cache {id: ${boardRow.id}, name: ${boardRow.name}}`)
+		boardIdCache.set(boardRow.id, board)
+
+		if (boardSlugCache.has(boardRow.slug)) {
+			console.warn(`Board not found in ID cache, but found in Name cache {_id: ${boardRow.id}, slug: ${boardRow.slug}}`)
 		} else {
-			boardSlugCache[board.slug] = board
+			boardSlugCache.set(boardRow.slug, board)
 		}
 	}
 
-	return boardIdCache[boardId.toHexString()]!
+	return boardIdCache.get(boardId)!
 }
 
-export async function getCachedBoardBySlug(slug: string): Promise<WithId<Board>> {
-	if (!boardSlugCache.hasOwnProperty(slug)) {
-		const board = await boardDal.getBySlug(slug)
+/**
+ * Get cached Board by its Slug
+ * @param slug Slug of the Board
+ */
+export async function getCachedBoardBySlug(slug: string): Promise<Board> {
+	if (!boardSlugCache.has(slug)) {
+		try {
+			const boardRow = await boardDal.getBySlug(slug)
 
-		if (!board) {
-			const err = `Board not found for slug ${slug}`
-			console.warn(err)
-			throw err
-		}
+			if (!boardRow) {
+				const err = `Board not found for slug ${slug}`
+				console.warn(err)
+				throw err
+			}
 
-		await initBoardConfigDefault()
+			await initBoardConfigDefault()
 
-		board.config = defaultsDeep(board.config, boardConfigDefault)
+			boardRow.config = defaultsDeep(boardRow.config, boardConfigDefault)
 
-		console.info(`Board not found in cache {_id: ${board._id.toHexString()}, slug: ${board.slug}}`)
-		boardSlugCache[board.slug] = board
+			const board = new Board(boardRow)
 
-		if (boardIdCache.hasOwnProperty(board._id.toHexString())) {
-			console.warn(`Board not found in Name cache, but found in ID cache {_id: ${board._id.toHexString()}, slug: ${board.slug}}`)
-		} else {
-			boardIdCache[board._id.toHexString()] = board
+			console.info(`Board not found in cache {id: ${boardRow.id}, slug: ${boardRow.slug}}`)
+			boardSlugCache.set(boardRow.slug, board)
+
+			if (boardIdCache.has(boardRow.id)) {
+				console.warn(`Board not found in Name cache, but found in ID cache {id: ${boardRow.id}, slug: ${boardRow.slug}}`)
+			} else {
+				boardIdCache.set(boardRow.id, board)
+			}
+		} catch (error) {
+			throw error
 		}
 	}
 
-	return boardSlugCache[slug]!
+	return boardSlugCache.get(slug)!
+}
+
+export async function hasBoardForSlug(slug: string): Promise<boolean> {
+	return boardSlugCache.has(slug)
+}
+
+export async function hasBoardForId(id: number): Promise<boolean> {
+	return boardIdCache.has(id)
 }
